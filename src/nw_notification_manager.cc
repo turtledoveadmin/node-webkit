@@ -9,6 +9,8 @@
 #include "content/nw/src/nw_notification_manager.h"
 #if defined(OS_MACOSX)
 #include "content/nw/src/nw_notification_manager_mac.h"
+#elif defined(OS_WIN)
+#include "content/nw/src/nw_notification_manager_win.h"
 #endif
 namespace nw {
     NotificationManager* NotificationManager::singleton_ = nullptr;
@@ -21,6 +23,8 @@ namespace nw {
         if(singleton_ == nullptr){
 #if defined(OS_MACOSX)
             singleton_ = new NotificationManagerMac();
+#elif defined(OS_WIN)
+			singleton_ = new NotificationManagerWin();
 #endif
         }
         return singleton_;
