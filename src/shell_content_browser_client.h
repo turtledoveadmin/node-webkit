@@ -98,6 +98,11 @@ class ShellContentBrowserClient : public ContentBrowserClient {
     int render_process_id,
     int render_view_id,
     bool worker) OVERRIDE;
+    
+   virtual void CancelDesktopNotification(
+    int render_process_id,
+    int render_view_id,
+    int notification_id) OVERRIDE;
 
  private:
   ShellBrowserContext* ShellBrowserContextForBrowserContext(

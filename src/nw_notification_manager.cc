@@ -7,6 +7,7 @@
 //
 
 #include "content/nw/src/nw_notification_manager.h"
+#include "content/public/browser/render_view_host.h"
 #if defined(OS_MACOSX)
 #include "content/nw/src/nw_notification_manager_mac.h"
 #elif defined(OS_WIN)
@@ -28,5 +29,14 @@ namespace nw {
 #endif
         }
         return singleton_;
+    }
+    
+    bool NotificationManager::DesktopNotificationPostClick(int render_process_id, int render_view_id, int notification_id){
+        content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
+        if (host == nullptr)
+            return false;
+        
+        host->DesktopNotificationPostClick(notification_id);
+        return true;
     }
 } // namespace nw
