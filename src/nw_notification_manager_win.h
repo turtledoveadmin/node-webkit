@@ -17,7 +17,9 @@ namespace nw {
 	public:
 		explicit NotificationManagerWin(){}
 		virtual ~NotificationManagerWin(){}
-		virtual bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params);
+		virtual bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
+											const int render_process_id, const int render_view_id, const bool worker);
+		virtual bool CancelDesktopNotification(int render_process_id, int render_view_id, int notification_id);
 	};
 
 } // namespace nw

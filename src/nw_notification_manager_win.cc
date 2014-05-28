@@ -9,7 +9,8 @@
 #include "content/nw/src/nw_notification_manager_win.h"
 
 namespace nw {
-	bool NotificationManagerWin::AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params){
+	bool NotificationManagerWin::AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
+		const int render_process_id, const int render_view_id, const bool worker){
 		NOTIFYICONDATA nid = {};
 		nid.cbSize = sizeof(nid);
 		nid.hWnd = NULL;// window_->GetNativeWindow();
@@ -24,5 +25,9 @@ namespace nw {
 		//LoadIconMetric(NULL, MAKEINTRESOURCE(IDI_APPLICATION), LIM_SMALL, &(nid.hIcon));
 		//LoadIconMetric(NULL, MAKEINTRESOURCE(IDI_INFORMATION), LIM_SMALL, &(nid.hBalloonIcon));
 		return Shell_NotifyIcon(NIM_ADD, &nid);
+	}
+
+	bool NotificationManagerWin::CancelDesktopNotification(int render_process_id, int render_view_id, int notification_id){
+		return false;
 	}
 } // namespace nw
