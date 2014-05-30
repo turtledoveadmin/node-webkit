@@ -40,12 +40,18 @@ static NWUserNotificationCenterDelegate *singleton_ = nil;
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center
      shouldPresentNotification:(NSUserNotification *)notification {
+    
+    NSNumber *render_process_id = [notification.userInfo objectForKey:@"render_process_id"];
+    NSNumber *render_view_id = [notification.userInfo objectForKey:@"render_view_id"];
+    NSNumber *notification_id = [notification.userInfo objectForKey:@"notification_id"];
+    
+    nw::NotificationManager::getSingleton()->DesktopNotificationPostDisplay(render_process_id.intValue,
+                                                                          render_view_id.intValue,
+                                                                          notification_id.intValue);
     return YES;
 }
 
-- (void) userNotificationCenter:(NSUserNotificationCenter *)center didActivateNotification:(NSUserNotification *)notification
-{
-    //NSRunAlertPanel([notification title], [notification informativeText], @"Ok", nil, nil);
+- (void) userNotificationCenter:(NSUserNotificationCenter *)center didActivateNotification:(NSUserNotification *)notification {
     NSNumber *render_process_id = [notification.userInfo objectForKey:@"render_process_id"];
     NSNumber *render_view_id = [notification.userInfo objectForKey:@"render_view_id"];
     NSNumber *notification_id = [notification.userInfo objectForKey:@"notification_id"];
@@ -60,11 +66,10 @@ static NWUserNotificationCenterDelegate *singleton_ = nil;
 
 namespace nw {
     bool NotificationManagerMac::AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
-                                                        const int render_process_id, const int render_view_id, const bool worker){
+                                                        const int render_process_id, const int render_view_id, const bool worker) {
         NSUserNotification *notification = [[NSUserNotification alloc] init];
         [notification setTitle:base::SysUTF16ToNSString(params.title)];
         [notification setInformativeText:base::SysUTF16ToNSString(params.body)];
-        //[notification setSubtitle:base::SysUTF8ToNSString(params.origin.spec())];
         notification.hasActionButton = YES;
         
         notification.userInfo  = @{ @"render_process_id" : [NSNumber numberWithInt:render_process_id],
