@@ -31,9 +31,18 @@ namespace nw {
 		
 		//variable to store the latest notification data, windows can only show 1 notification
 		int render_process_id_, render_view_id_, notification_id_;
-		//dispatch the click event from the latest notification
+		//dispatch the events from the latest notification
 		bool DesktopNotificationPostClick(){
 			return NotificationManager::DesktopNotificationPostClick(render_process_id_, render_view_id_, notification_id_);
+		}
+		bool DesktopNotificationPostClose(bool by_user){
+			return NotificationManager::DesktopNotificationPostClose(render_process_id_, render_view_id_, notification_id_, by_user);
+		}
+		bool DesktopNotificationPostDisplay(){
+			return NotificationManager::DesktopNotificationPostDisplay(render_process_id_, render_view_id_, notification_id_);
+		}
+		bool DesktopNotificationPostError(const string16& message){
+			return NotificationManager::DesktopNotificationPostError(render_process_id_, render_view_id_, notification_id_, message);
 		}
 
 	public:

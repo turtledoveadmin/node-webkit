@@ -23,7 +23,11 @@ namespace nw {
         virtual bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
                                             const int render_process_id, const int render_view_id, const bool worker) = 0;
         virtual bool CancelDesktopNotification(int render_process_id, int render_view_id, int notification_id) = 0;
-        bool DesktopNotificationPostClick(int render_process_id, int render_view_id, int notification_id);
+        
+		bool DesktopNotificationPostClick(int render_process_id, int render_view_id, int notification_id);
+		bool DesktopNotificationPostClose(int render_process_id, int render_view_id, int notification_id, bool by_user);
+		bool DesktopNotificationPostDisplay(int render_process_id, int render_view_id, int notification_id);
+		bool DesktopNotificationPostError(int render_process_id, int render_view_id, int notification_id, const string16& message);
 
     };
 
