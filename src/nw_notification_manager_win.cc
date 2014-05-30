@@ -18,7 +18,6 @@
 
 #include "ui/gfx/image/image.h"
 #include "base/strings/utf_string_conversions.h"
-//#include "content/public/browser/web_contents.h"
 
 
 namespace nw {
@@ -103,8 +102,6 @@ namespace nw {
 		content::Shell* shell = content::Shell::FromRenderViewHost(host);
 		nw::Package* package = shell->GetPackage();
 		gfx::Image icon = shell->window()->app_icon();
-		//package->GetImage(base::FilePath::FromUTF8Unsafe(params.icon_url.spec()), &icon);
-		//shell->web_contents()->DownloadImage()
 
 		if (status_icon_ == nullptr){
 			status_icon_ = status_tray_->CreateStatusIcon(StatusTray::NOTIFICATION_TRAY_ICON,
