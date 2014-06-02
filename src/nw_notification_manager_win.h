@@ -20,18 +20,21 @@ namespace nw {
 
 		// The icons on the system tray.
 		StatusIcon* status_icon_;
-		//number of notification in the queue
+
+		// number of notification in the queue
 		int notification_count_;
-		//decrement the status_icon_count_, if the value is 0 remove the status_icon_ from the tray
+
+		// decrement the status_icon_count_, if the value is 0 remove the status_icon_ from the tray
 		bool ReleaseNotification();
 
 		// Click observer.
 		friend class TrayObserver;
 		TrayObserver* status_observer_;
 		
-		//variable to store the latest notification data, windows can only show 1 notification
+		// variable to store the latest notification data, windows can only show 1 notification
 		int render_process_id_, render_view_id_, notification_id_;
-		//dispatch the events from the latest notification
+
+		// dispatch the events from the latest notification
 		bool DesktopNotificationPostClick(){
 			return NotificationManager::DesktopNotificationPostClick(render_process_id_, render_view_id_, notification_id_);
 		}
@@ -45,11 +48,29 @@ namespace nw {
 			return NotificationManager::DesktopNotificationPostError(render_process_id_, render_view_id_, notification_id_, message);
 		}
 
+		// icon image download callback
+		static void ImageDownloadCallback(int id, int http_status, const GURL& image_url, const std::vector<SkBitmap>& bitmaps, const std::vector<gfx::Size>& size);
+		struct DesktopNotificationParams {
+			content::ShowDesktopNotificationHostMsgParams params_;
+			int render_view_id_;
+			int render_process_id_;
+			bool worker_;
+		};
+
+		// map used to stored desktop notification params used by ImageDownloadCallback
+		std::map<int, DesktopNotificationParams> desktop_notification_params_;
+
+		// internal function for AddDesktopNotification
+		bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
+			const int render_process_id, const int render_view_id, const bool worker, const std::vector<SkBitmap>* bitmaps);
+
 	public:
 		explicit NotificationManagerWin();
 		virtual ~NotificationManagerWin();
 		virtual bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
-											const int render_process_id, const int render_view_id, const bool worker);
+			const int render_process_id, const int render_view_id, const bool worker) {
+			return AddDesktopNotification(params, render_process_id, render_view_id, worker, NULL);
+		}
 		virtual bool CancelDesktopNotification(int render_process_id, int render_view_id, int notification_id);
 	};
 
