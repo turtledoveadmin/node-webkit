@@ -453,8 +453,8 @@ gfx::Point NativeWindowWin::GetPosition() {
   return window_->GetWindowBoundsInScreen().origin();
 }
 
-void NativeWindowWin::FlashFrame(bool flash) {
-  window_->FlashFrame(flash);
+void NativeWindowWin::FlashFrame(int count) {
+  window_->FlashFrame(count);
 }
 
 void NativeWindowWin::SetBadgeLabel(const std::string& badge) {
