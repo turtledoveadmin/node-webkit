@@ -19,6 +19,7 @@ namespace nw {
         static NotificationManager *singleton_;
 
 	protected:
+        explicit NotificationManager();
 
 		// icon image download callback
 		static void ImageDownloadCallback(int id, int http_status, const GURL& image_url, const std::vector<SkBitmap>& bitmaps, const std::vector<gfx::Size>& size);

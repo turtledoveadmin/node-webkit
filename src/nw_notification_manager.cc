@@ -17,6 +17,10 @@
 namespace nw {
     NotificationManager* NotificationManager::singleton_ = nullptr;
     
+    NotificationManager::NotificationManager() {
+        
+    }
+    
     NotificationManager::~NotificationManager(){
         singleton_ = nullptr;
     }
