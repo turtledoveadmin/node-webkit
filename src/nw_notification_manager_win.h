@@ -48,20 +48,8 @@ namespace nw {
 			return NotificationManager::DesktopNotificationPostError(render_process_id_, render_view_id_, notification_id_, message);
 		}
 
-		// icon image download callback
-		static void ImageDownloadCallback(int id, int http_status, const GURL& image_url, const std::vector<SkBitmap>& bitmaps, const std::vector<gfx::Size>& size);
-		struct DesktopNotificationParams {
-			content::ShowDesktopNotificationHostMsgParams params_;
-			int render_view_id_;
-			int render_process_id_;
-			bool worker_;
-		};
-
-		// map used to stored desktop notification params used by ImageDownloadCallback
-		std::map<int, DesktopNotificationParams> desktop_notification_params_;
-
 		// internal function for AddDesktopNotification
-		bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
+		virtual bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
 			const int render_process_id, const int render_view_id, const bool worker, const std::vector<SkBitmap>* bitmaps);
 
 	public:

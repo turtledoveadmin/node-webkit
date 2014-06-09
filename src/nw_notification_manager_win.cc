@@ -89,13 +89,6 @@ namespace nw {
 			status_tray_ = NULL;
 		}
 	}
-	
-	void NotificationManagerWin::ImageDownloadCallback(int id, int http_status, const GURL& image_url, const std::vector<SkBitmap>& bitmaps, const std::vector<gfx::Size>& size) {
-		NotificationManagerWin *singleton = static_cast<NotificationManagerWin*>(getSingleton());
-		DesktopNotificationParams params = singleton->desktop_notification_params_[id];
-		singleton->AddDesktopNotification(params.params_, params.render_process_id_, params.render_view_id_, params.worker_, &bitmaps);
-		singleton->desktop_notification_params_.erase(id);
-	}
 
 	bool NotificationManagerWin::AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
 		const int render_process_id, const int render_view_id, const bool worker, const std::vector<SkBitmap>* bitmaps){
