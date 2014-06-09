@@ -106,7 +106,7 @@ namespace nw {
 			desktop_notification_params.render_view_id_ = render_view_id;
 
 			// download the icon image first
-			content::WebContents::ImageDownloadCallback imageDownloadCallback = base::Bind(&NotificationManagerWin::ImageDownloadCallback);
+			content::WebContents::ImageDownloadCallback imageDownloadCallback = base::Bind(&NotificationManager::ImageDownloadCallback);
 			int id = shell->web_contents()->DownloadImage(params.icon_url, true, 0, imageDownloadCallback);
 			desktop_notification_params_[id] = desktop_notification_params;
 
