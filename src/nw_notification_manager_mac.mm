@@ -10,6 +10,12 @@
 #include "base/mac/scoped_nsobject.h"
 #include "base/strings/sys_string_conversions.h"
 
+#include "content/public/browser/web_contents.h"
+#include "content/public/browser/render_view_host.h"
+#include "content/nw/src/browser/native_window.h"
+#include "content/nw/src/nw_package.h"
+#include "content/nw/src/nw_shell.h"
+
 #include "content/nw/src/nw_notification_manager_mac.h"
 
 #if !defined(MAC_OS_X_VERSION_10_8) || \
@@ -65,12 +71,52 @@ static NWUserNotificationCenterDelegate *singleton_ = nil;
 @end
 
 namespace nw {
+    NotificationManagerMac::NotificationManagerMac() {
+        
+    }
+    
+    bool NotificationManagerMac::AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams &params, const int render_process_id, const int render_view_id, const bool worker) {
+			return AddDesktopNotification(params, render_process_id, render_view_id, worker, NULL);
+    }
+    
     bool NotificationManagerMac::AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
-                                                        const int render_process_id, const int render_view_id, const bool worker) {
+                                                        const int render_process_id, const int render_view_id, const bool worker, const std::vector<SkBitmap>* bitmaps) {
+        
+        content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
+		if (host == nullptr)
+			return false;
+        content::Shell* shell = content::Shell::FromRenderViewHost(host);
+		
+		if (bitmaps == NULL) {
+			// called from public function, save the params
+			DesktopNotificationParams desktop_notification_params;
+			desktop_notification_params.params_ = params;
+			desktop_notification_params.render_process_id_ = render_process_id;
+			desktop_notification_params.render_view_id_ = render_view_id;
+            
+			// download the icon image first
+			content::WebContents::ImageDownloadCallback imageDownloadCallback = base::Bind(&NotificationManager::ImageDownloadCallback);
+			int id = shell->web_contents()->DownloadImage(params.icon_url, true, 0, imageDownloadCallback);
+			desktop_notification_params_[id] = desktop_notification_params;
+            
+			// wait for the image download callback
+			return true;
+		}
+        
+        // if we reach here, it means the function is called from image download callback
+ 
         NSUserNotification *notification = [[NSUserNotification alloc] init];
         [notification setTitle:base::SysUTF16ToNSString(params.title)];
         [notification setInformativeText:base::SysUTF16ToNSString(params.body)];
         notification.hasActionButton = YES;
+        
+        if (bitmaps->size()) {
+            // try to get the notification icon image given by image download callback
+			gfx::Image icon = gfx::Image::CreateFrom1xBitmap(bitmaps->at(0));
+            
+            // this is undocumented feature !!
+            [notification setContentImage:icon.ToNSImage()];
+        }
         
         notification.userInfo  = @{ @"render_process_id" : [NSNumber numberWithInt:render_process_id],
                                     @"render_view_id" : [NSNumber numberWithInt:render_view_id],
