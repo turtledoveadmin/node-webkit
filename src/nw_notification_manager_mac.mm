@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#include "base/mac/scoped_nsobject.h"
+#include "base/mac/mac_util.h"
 #include "base/strings/sys_string_conversions.h"
 
 #include "content/public/browser/web_contents.h"
@@ -86,8 +86,10 @@ namespace nw {
 		if (host == nullptr)
 			return false;
         content::Shell* shell = content::Shell::FromRenderViewHost(host);
+        
+        static const bool downloadImage = base::mac::IsOSMavericksOrLater();
 		
-		if (bitmaps == NULL) {
+		if (bitmaps == NULL && downloadImage) {
 			// called from public function, save the params
 			DesktopNotificationParams desktop_notification_params;
 			desktop_notification_params.params_ = params;
@@ -110,11 +112,11 @@ namespace nw {
         [notification setInformativeText:base::SysUTF16ToNSString(params.body)];
         notification.hasActionButton = YES;
         
-        if (bitmaps->size()) {
+        if (bitmaps && bitmaps->size()) {
             // try to get the notification icon image given by image download callback
 			gfx::Image icon = gfx::Image::CreateFrom1xBitmap(bitmaps->at(0));
             
-            // this is undocumented feature !!
+            // this function only runs on Mavericks or later
             [notification setContentImage:icon.ToNSImage()];
         }
         
