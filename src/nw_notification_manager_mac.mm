@@ -69,7 +69,6 @@ static NWUserNotificationCenterDelegate *singleton_ = nil;
 
 namespace nw {
 NotificationManagerMac::NotificationManagerMac() {
-
 }
 
 bool NotificationManagerMac::AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams &params, const int render_process_id, const int render_view_id, const bool worker) {

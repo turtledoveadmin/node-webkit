@@ -31,11 +31,10 @@ public:
   virtual ~TrayObserver() {
   }
 
-  virtual void OnStatusIconClicked() OVERRIDE{
-
+  virtual void OnStatusIconClicked() OVERRIDE {
   }
 
-  virtual void OnBalloonEvent(int event) OVERRIDE{
+  virtual void OnBalloonEvent(int event) OVERRIDE {
     switch (event) {
     case NIN_BALLOONHIDE:
       tray_->DesktopNotificationPostClose(true);
@@ -51,7 +50,7 @@ public:
     }
   }
 
-  virtual void OnBalloonClicked() OVERRIDE{
+  virtual void OnBalloonClicked() OVERRIDE {
     tray_->DesktopNotificationPostClick();
     tray_->ReleaseNotification();
   }

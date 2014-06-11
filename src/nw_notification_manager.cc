@@ -61,7 +61,7 @@ bool NotificationManager::DesktopNotificationPostClick(int render_process_id, in
   return true;
 }
 
-bool NotificationManager::DesktopNotificationPostClose(int render_process_id, int render_view_id, int notification_id, bool by_user){
+bool NotificationManager::DesktopNotificationPostClose(int render_process_id, int render_view_id, int notification_id, bool by_user) {
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
   if (host == nullptr)
     return false;
@@ -70,7 +70,7 @@ bool NotificationManager::DesktopNotificationPostClose(int render_process_id, in
   return true;
 }
 
-bool NotificationManager::DesktopNotificationPostDisplay(int render_process_id, int render_view_id, int notification_id){
+bool NotificationManager::DesktopNotificationPostDisplay(int render_process_id, int render_view_id, int notification_id) {
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
   if (host == nullptr)
     return false;
@@ -79,7 +79,7 @@ bool NotificationManager::DesktopNotificationPostDisplay(int render_process_id, 
   return true;
 }
 
-bool NotificationManager::DesktopNotificationPostError(int render_process_id, int render_view_id, int notification_id, const string16& message){
+bool NotificationManager::DesktopNotificationPostError(int render_process_id, int render_view_id, int notification_id, const string16& message) {
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
   if (host == nullptr)
     return false;
