@@ -14,6 +14,8 @@
 #include "content/nw/src/nw_notification_manager_mac.h"
 #elif defined(OS_WIN)
 #include "content/nw/src/nw_notification_manager_win.h"
+#elif defined(OS_LINUX)
+#include "content/nw/src/nw_notification_manager_linux.h"
 #endif
 
 namespace nw
@@ -33,6 +35,8 @@ NotificationManager* NotificationManager::getSingleton() {
     singleton_ = new NotificationManagerMac();
 #elif defined(OS_WIN)
     singleton_ = new NotificationManagerWin();
+#elif defined(OS_LINUX)
+    singleton_ = new NotificationManagerLinux();
 #endif
   }
   return singleton_;
