@@ -294,6 +294,8 @@
         'src/nw_notification_manager_win.cc',		
         'src/nw_notification_manager_mac.h',
         'src/nw_notification_manager_mac.mm',
+        'src/nw_notification_manager_linux.h',
+        'src/nw_notification_manager_linux.cc',
         'src/shell_browser_context.cc',
         'src/shell_browser_context.h',
         'src/shell_browser_main.cc',

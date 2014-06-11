@@ -447,38 +447,36 @@ ShellContentBrowserClient::CreateQuotaPermissionContext() {
 }
 
 void ShellContentBrowserClient::ShowDesktopNotification(
-    const ShowDesktopNotificationHostMsgParams& params,
-    int render_process_id,
-    int render_view_id,
-    bool worker){
+  const ShowDesktopNotificationHostMsgParams& params,
+  int render_process_id,
+  int render_view_id,
+  bool worker) {
 #if defined(ENABLE_NOTIFICATIONS)
-    nw::NotificationManager *notificationManager = nw::NotificationManager::getSingleton();
-    if(notificationManager == nullptr)
-    {
-        NOTIMPLEMENTED();
-        return;
-    }
-    notificationManager->AddDesktopNotification(params, render_process_id, render_view_id, worker);
-#else
+  nw::NotificationManager *notificationManager = nw::NotificationManager::getSingleton();
+  if (notificationManager == nullptr) {
     NOTIMPLEMENTED();
+    return;
+  }
+  notificationManager->AddDesktopNotification(params, render_process_id, render_view_id, worker);
+#else
+  NOTIMPLEMENTED();
 #endif
 
 }
 
 void ShellContentBrowserClient::CancelDesktopNotification(
-    int render_process_id,
-    int render_view_id,
-    int notification_id){
+  int render_process_id,
+  int render_view_id,
+  int notification_id) {
 #if defined(ENABLE_NOTIFICATIONS)
-    nw::NotificationManager *notificationManager = nw::NotificationManager::getSingleton();
-    if(notificationManager == nullptr)
-    {
-        NOTIMPLEMENTED();
-        return;
-    }
-    notificationManager->CancelDesktopNotification(render_process_id, render_view_id, notification_id);
-#else
+  nw::NotificationManager *notificationManager = nw::NotificationManager::getSingleton();
+  if (notificationManager == nullptr) {
     NOTIMPLEMENTED();
+    return;
+  }
+  notificationManager->CancelDesktopNotification(render_process_id, render_view_id, notification_id);
+#else
+  NOTIMPLEMENTED();
 #endif
 }
 
