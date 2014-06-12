@@ -112,6 +112,10 @@ App.prototype.__defineGetter__('manifest', function() {
   return manifest;
 });
 
+App.prototype.__defineGetter__('screens', function() {
+  return JSON.parse(nw.callStaticMethodSync('App', 'GetScreens', [ ]));
+});
+
 // Store App object in node's context.
 if (process['_nw_app']) {
   exports.App = process['_nw_app'];
