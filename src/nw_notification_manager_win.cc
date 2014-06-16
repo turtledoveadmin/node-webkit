@@ -8,7 +8,7 @@
 
 #include "chrome/browser/status_icons/status_icon.h"
 #include "chrome/browser/status_icons/status_icon_observer.h"
-#include "chrome/browser/status_icons/status_tray.h"
+#include "chrome/browser/ui/views/status_icons/status_tray_win.h"
 
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/render_view_host.h"
@@ -58,20 +58,32 @@ private:
   NotificationManagerWin* tray_;
 };
 
-NotificationManagerWin::NotificationManagerWin() {
-  status_tray_ = StatusTray::Create();
-  status_icon_ = nullptr;
-  notification_count_ = 0;
+NotificationManagerWin::NotificationManagerWin() : status_icon_(NULL) {
+  status_tray_ = static_cast<StatusTrayWin*>(StatusTray::GetSingleton());
+
+  // check if status icon is already created
+  StatusIcon* status_icon = status_tray_->GetStatusIcon();
+
+  // if status icon already created, set the notification count to 1 and add the observer
+  notification_count_ = status_icon ? 1 : 0;
+  if (status_icon) {
+    status_observer_ = new TrayObserver(this);
+    status_icon->AddObserver(status_observer_);
+  }
 }
 
 bool NotificationManagerWin::ReleaseNotification() {
   if (notification_count_ > 0) {
     if (notification_count_ == 1) {
-      status_icon_->RemoveObserver(status_observer_);
-      delete status_observer_;
+      // if I create the status_icon_ I am responsible to delete it
+      if (status_icon_) {
+        status_icon_->RemoveObserver(status_observer_);
+        status_tray_->RemoveStatusIcon(status_icon_);
+        status_icon_ = NULL;
+      }
 
-      status_tray_->RemoveStatusIcon(status_icon_);
-      status_icon_ = NULL;
+      delete status_observer_;
+      status_observer_ = NULL;
     }
     notification_count_--;
     return true;
@@ -83,9 +95,14 @@ bool NotificationManagerWin::ReleaseNotification() {
 NotificationManagerWin::~NotificationManagerWin() {
   ReleaseNotification();
 
-  if (status_tray_){
-    delete status_tray_;
-    status_tray_ = NULL;
+  // this is to clean up status_observer_ if it is created by the constructor
+  if (status_observer_) {
+    StatusIcon* status_icon = status_tray_->GetStatusIcon();
+    if (status_icon)
+      status_icon->RemoveObserver(status_observer_);
+
+    delete status_observer_;
+    status_observer_ = NULL;
   }
 }
 
@@ -93,7 +110,7 @@ bool NotificationManagerWin::AddDesktopNotification(const content::ShowDesktopNo
   const int render_process_id, const int render_view_id, const bool worker, const std::vector<SkBitmap>* bitmaps) {
 
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
-  if (host == nullptr)
+  if (host == NULL)
     return false;
 
   content::Shell* shell = content::Shell::FromRenderViewHost(host);
@@ -122,14 +139,19 @@ bool NotificationManagerWin::AddDesktopNotification(const content::ShowDesktopNo
   // set the default notification icon as the app icon
   gfx::Image icon = shell->window()->app_icon();
 
+  // always check if status icon is exist or not
+  StatusIcon* status_icon = status_tray_->GetStatusIcon();
+
   // status_icon_ is null, it means we need to create and adds it to the tray
-  if (status_icon_ == nullptr) {
+  if (status_icon == NULL) {
     nw::Package* package = shell->GetPackage();
     status_icon_ = status_tray_->CreateStatusIcon(StatusTray::NOTIFICATION_TRAY_ICON,
       *(shell->window()->app_icon().ToImageSkia()), UTF8ToUTF16(package->GetName()));
+    status_icon = status_icon_;
     status_observer_ = new TrayObserver(this);
-    status_icon_->AddObserver(status_observer_);
+    status_icon->AddObserver(status_observer_);
   }
+
   // add the counter
   notification_count_++;
   // try to get the notification icon image given by image download callback
@@ -137,7 +159,7 @@ bool NotificationManagerWin::AddDesktopNotification(const content::ShowDesktopNo
     icon = gfx::Image::CreateFrom1xBitmap(bitmaps->at(0));
 
   //show the baloon
-  bool result = status_icon_->DisplayBalloon(icon.IsEmpty() ? gfx::ImageSkia() : *icon.ToImageSkia(), params.title, params.body);
+  bool result = status_icon->DisplayBalloon(icon.IsEmpty() ? gfx::ImageSkia() : *icon.ToImageSkia(), params.title, params.body);
   if (!result) {
     DesktopNotificationPostError(L"DisplayBalloon fail");
     ReleaseNotification();

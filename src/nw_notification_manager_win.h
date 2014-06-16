@@ -10,15 +10,15 @@
 #define CONTENT_NW_NOTIFICATION_MANAGER_WIN_H_
 
 #include "content/nw/src/nw_notification_manager.h"
-class StatusTray;
+class StatusTrayWin;
 class StatusIcon;
 
 namespace nw {
 class NotificationManagerWin : public NotificationManager{
   // The global presentation of system tray.
-  StatusTray* status_tray_;
+  StatusTrayWin* status_tray_;
 
-  // The icons on the system tray.
+  // StatusIcon pointer created by ME
   StatusIcon* status_icon_;
 
   // number of notification in the queue
