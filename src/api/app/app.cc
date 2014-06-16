@@ -19,6 +19,8 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "content/nw/src/api/app/app.h"
+#include "content/nw/src/api/dispatcher_host.h"
+#include "content/nw/src/api/event/event.h"
 
 #include "base/command_line.h"
 #include "base/logging.h"
@@ -35,6 +37,7 @@
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/render_process_host.h"
 #include "ui/gfx/screen.h"
+#include "ui/gfx/display_observer.h"
 
 using base::MessageLoop;
 using content::Shell;
@@ -71,6 +74,77 @@ void GetRenderProcessHosts(std::set<RenderProcessHost*>& rphs) {
 }
 
 }  // namespace
+  
+std::string DisplayToJSON(const gfx::Display& display) {
+  std::stringstream ret;
+  gfx::Rect rect = display.bounds();
+
+  ret << "{\"id\":" << display.id();
+  
+  ret << ",\"bounds\":{\"x\":" << rect.x()
+  << ", \"y\":" << rect.y()
+  << ", \"width\":" << rect.width()
+  << ", \"height\":" << rect.height() << "}";
+  
+  rect = display.work_area();
+  ret << ",\"work_area\":{\"x\":" << rect.x()
+  << ", \"y\":" << rect.y()
+  << ", \"width\":" << rect.width()
+  << ", \"height\":" << rect.height() << "}";
+  
+  ret << ",\"scaleFactor\":" << display.device_scale_factor();
+  ret << ",\"isBuiltIn\":" << (display.IsInternal() ? "true" : "false");
+  ret << "}";
+  
+  return ret.str();
+}
+  
+class JavaScriptDisplayObserver : BaseEvent, public gfx::DisplayObserver {
+  friend class EventListener;
+  EventListener* object_;
+  gfx::Screen* screen_;
+  
+  // Called when the |display|'s bound has changed.
+  virtual void OnDisplayBoundsChanged(const gfx::Display& display) OVERRIDE {
+    base::ListValue arguments;
+    arguments.AppendString(DisplayToJSON(display));
+    object_->dispatcher_host()->SendEvent(object_, "onDisplayBoundsChanged", arguments);
+  }
+  
+  // Called when |new_display| has been added.
+  virtual void OnDisplayAdded(const gfx::Display& new_display) OVERRIDE {
+    base::ListValue arguments;
+    arguments.AppendString(DisplayToJSON(new_display));
+    object_->dispatcher_host()->SendEvent(object_, "onDisplayAdded", arguments);
+
+  }
+  
+  // Called when |old_display| has been removed.
+  virtual void OnDisplayRemoved(const gfx::Display& old_display) OVERRIDE {
+    base::ListValue arguments;
+    arguments.AppendString(DisplayToJSON(old_display));
+    object_->dispatcher_host()->SendEvent(object_, "onDisplayRemoved", arguments);
+  }
+
+  static const int id;
+  
+  JavaScriptDisplayObserver(EventListener* object) : object_(object), screen_(NULL){
+  }
+  
+  virtual ~JavaScriptDisplayObserver() {
+    if(screen_)
+      screen_->RemoveObserver(this);
+  }
+  
+public:
+  void setScreen(gfx::Screen* screen) {
+    if(screen_) screen_->RemoveObserver(this);
+    screen_ = screen;
+    if(screen_) screen_->AddObserver(this);
+  }
+};
+  
+const int JavaScriptDisplayObserver::id = EventListener::getUID();
 
 // static
 void App::Call(const std::string& method,
@@ -138,29 +212,18 @@ void App::Call(Shell* shell,
     }
     
     for (size_t i=0; i<displays.size(); i++) {
-      if(i==0) ret << "{"; else ret << ",{";
-      
-      const gfx::Display& display = displays[i];
-      gfx::Rect rect = display.bounds();
-
-      ret << "\"id\":" << display.id();
-
-      ret << ",\"bounds\":{\"x\":" << rect.x()
-        << ", \"y\":" << rect.y()
-        << ", \"width\":" << rect.width()
-        << ", \"height\":" << rect.height() << "}";
-      
-      rect = display.work_area();
-      ret << ",\"work_area\":{\"x\":" << rect.x()
-      << ", \"y\":" << rect.y()
-      << ", \"width\":" << rect.width()
-      << ", \"height\":" << rect.height() << "}";
-      
-      ret << ",\"scaleFactor\":" << display.device_scale_factor();
-      ret << ",\"isBuiltIn\":" << (display.IsInternal() ? "true" : "false");
-      ret << "}";
+      if(i!=0) ret << ",";
+      ret << DisplayToJSON(displays[i]);
     }
     result->AppendString("["+ret.str()+"]");
+    return;
+  } else if (method == "SetScreenChangeCallback") {
+    int object_id = 0;
+    arguments.GetInteger(0, &object_id);
+    EventListener* event_listener = FindDispatcherHost(shell->web_contents()->GetRenderViewHost())->GetApiObject<EventListener>(object_id);
+    JavaScriptDisplayObserver* listener = event_listener->AddListener<JavaScriptDisplayObserver>();
+    if (listener) listener->setScreen(gfx::Screen::GetNativeScreen());
+    result->AppendBoolean(listener != NULL);
     return;
   }
 
