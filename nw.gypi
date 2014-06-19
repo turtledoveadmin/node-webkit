@@ -140,6 +140,8 @@
         'src/api/dispatcher_host.h',
         'src/api/event/event.h',
         'src/api/event/event.cc',
+        'src/api/screen/screen.h',
+        'src/api/screen/screen.cc',
         'src/api/window_bindings.cc',
         'src/api/window_bindings.h',
         'src/api/menu/menu.cc',

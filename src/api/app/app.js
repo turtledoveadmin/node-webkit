@@ -19,7 +19,6 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var argv, fullArgv, dataPath, manifest;
-var v8_util = process.binding('v8_util');
 
 function App() {
 }
@@ -112,32 +111,6 @@ App.prototype.__defineGetter__('manifest', function() {
   }
   return manifest;
 });
-
-App.prototype.__defineGetter__('screens', function() {
-  return JSON.parse(nw.callStaticMethodSync('App', 'GetScreens', [ ]));
-});
-
-
-App.prototype.setScreenChangeCallback = function(event_listener) {
-  if (v8_util.getConstructorName(event_listener) != "EventListener")
-    throw new String('type must be EventListener');
-  if (!event_listener.hasOwnProperty('onDisplayBoundsChanged') ||
-      typeof event_listener.onDisplayBoundsChanged != 'function' ||
-      event_listener.onDisplayBoundsChanged.length !=1 ) {
-    throw new TypeError("event_listener must have onDisplayBoundsChanged function");
-  }
-  if (!event_listener.hasOwnProperty('onDisplayAdded') ||
-      typeof event_listener.onDisplayAdded != 'function' ||
-      event_listener.onDisplayAdded.length !=1 ) {
-    throw new TypeError("event_listener must have onDisplayAdded function");
-  }
-  if (!event_listener.hasOwnProperty('onDisplayRemoved') ||
-      typeof event_listener.onDisplayRemoved != 'function' ||
-      event_listener.onDisplayRemoved.length !=1 ) {
-    throw new TypeError("event_listener must have onDisplayRemoved function");
-  }
-  return nw.callStaticMethodSync('App', 'SetScreenChangeCallback', [ event_listener.id ]);
-}
 
 // Store App object in node's context.
 if (process['_nw_app']) {

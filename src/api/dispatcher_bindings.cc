@@ -174,9 +174,9 @@ DispatcherBindings::RequireNwGui(const v8::FunctionCallbackInfo<v8::Value>& args
   RequireFromResource(args.This(),
       NwGui, v8::String::New("shell.js"), IDR_NW_API_SHELL_JS);
   RequireFromResource(args.This(),
-      NwGui, v8::String::New("event.js"), IDR_NW_API_EVENT_JS);
-  RequireFromResource(args.This(),
       NwGui, v8::String::New("app.js"), IDR_NW_API_APP_JS);
+  RequireFromResource(args.This(),
+      NwGui, v8::String::New("screen.js"), IDR_NW_API_SCREEN_JS);
 
   args.GetReturnValue().Set(scope.Close(NwGui));
 }
