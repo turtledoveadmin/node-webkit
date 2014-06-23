@@ -34,7 +34,6 @@
 #include "content/common/view_messages.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/render_process_host.h"
-#include "ui/gfx/screen.h"
 
 using base::MessageLoop;
 using content::Shell;
@@ -127,40 +126,6 @@ void App::Call(Shell* shell,
     std::string path;
     arguments.GetString(0, &path);
     result->AppendBoolean(SetCrashDumpPath(path.c_str()));
-    return;
-  } else if (method == "GetScreens") {
-    std::stringstream ret;
-    const std::vector<gfx::Display>& displays = gfx::Screen::GetNativeScreen()->GetAllDisplays();
-    
-    if (displays.size() == 0) {
-      result->AppendString("{}");
-      return;
-    }
-    
-    for (size_t i=0; i<displays.size(); i++) {
-      if(i==0) ret << "{"; else ret << ",{";
-      
-      const gfx::Display& display = displays[i];
-      gfx::Rect rect = display.bounds();
-
-      ret << "\"id\":" << display.id();
-
-      ret << ",\"bounds\":{\"x\":" << rect.x()
-        << ", \"y\":" << rect.y()
-        << ", \"width\":" << rect.width()
-        << ", \"height\":" << rect.height() << "}";
-      
-      rect = display.work_area();
-      ret << ",\"work_area\":{\"x\":" << rect.x()
-      << ", \"y\":" << rect.y()
-      << ", \"width\":" << rect.width()
-      << ", \"height\":" << rect.height() << "}";
-      
-      ret << ",\"scaleFactor\":" << display.device_scale_factor();
-      ret << ",\"isBuiltIn\":" << (display.IsInternal() ? "true" : "false");
-      ret << "}";
-    }
-    result->AppendString("["+ret.str()+"]");
     return;
   }
 
