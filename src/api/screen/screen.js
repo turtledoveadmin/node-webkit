@@ -21,6 +21,7 @@
 
 function Screen() {
   nw.allocateObject(this, {});
+  this._numListener = 0;
 }
 require('util').inherits(Screen, exports.Base);
 
@@ -28,10 +29,28 @@ require('util').inherits(Screen, exports.Base);
 Screen.prototype.on = Screen.prototype.addListener = function(ev, callback) {
   if ( ev != "displayBoundsChanged" && ev != "displayAdded" && ev != "displayRemoved" )
     throw new String('only following event can be listened: displayBoundsChanged, displayAdded, displayRemoved');
+  
+  var onRemoveListener = function (type, listener) {
+    if (this._numListener > 0) {
+      this._numListener--;
+      if (this._numListener == 0) {
+        process.EventEmitter.prototype.removeListener.apply(this, ["removeListener", onRemoveListener]);
+        nw.callStaticMethodSync('Screen', 'RemoveScreenChangeCallback', [ this.id ]);
+      }
+    }
+  };
 
-  nw.callStaticMethodSync('Screen', 'SetScreenChangeCallback', [ this.id ]);
+  if(this._numListener == 0) {
+    if (nw.callStaticMethodSync('Screen', 'AddScreenChangeCallback', [ this.id ]) == false ) {
+      throw new String('nw.callStaticMethodSync(Screen, AddScreenChangeCallback) fails');
+      return;
+    }
+    process.EventEmitter.prototype.addListener.apply(this, ["removeListener", onRemoveListener]);
+  }
+  
   // Call parent.
   process.EventEmitter.prototype.addListener.apply(this, arguments);
+  this._numListener++;
 }
 
 // Route events.
