@@ -107,13 +107,20 @@ void Screen::Call(DispatcherHost* dispatcher_host,
     }
     result->AppendString("["+ret.str()+"]");
     return;
-  } else if (method == "SetScreenChangeCallback") {
+  } else if (method == "AddScreenChangeCallback") {
     int object_id = 0;
     arguments.GetInteger(0, &object_id);
     EventListener* event_listener = dispatcher_host->GetApiObject<EventListener>(object_id);
     JavaScriptDisplayObserver* listener = event_listener->AddListener<JavaScriptDisplayObserver>();
     if (listener) listener->setScreen(gfx::Screen::GetNativeScreen());
     result->AppendBoolean(listener != NULL);
+    return;
+  } else if (method == "RemoveScreenChangeCallback") {
+    int object_id = 0;
+    arguments.GetInteger(0, &object_id);
+    EventListener* event_listener = dispatcher_host->GetApiObject<EventListener>(object_id);
+    bool res = event_listener->RemoveListener<JavaScriptDisplayObserver>();
+    result->AppendBoolean(res);
     return;
   }
   
