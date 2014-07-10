@@ -22,7 +22,9 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
+#include "base/file_util.h"
 #include "base/message_loop/message_loop.h"
+#include "base/path_service.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_restrictions.h"
@@ -43,6 +45,8 @@
 #include "net/base/net_module.h"
 #include "net/proxy/proxy_resolver_v8.h"
 #include "ui/base/resource/resource_bundle.h"
+#include "third_party/zlib/google/zip.h"
+#include "grit/nw_resources.h"
 
 #if !defined(OS_WIN)
 #include <sys/resource.h>
@@ -218,6 +222,63 @@ void ShellBrowserMainParts::Init() {
     }
   }
   devtools_delegate_ = new ShellDevToolsDelegate(browser_context_.get(), port);
+    
+  if (!command_line.HasSwitch(switches::kBitmapFontDir)) {
+    scoped_refptr<base::RefCountedStaticMemory> data(ResourceBundle::GetSharedInstance().LoadDataResourceBytes(IDR_NW_BITMAPFONT));
+    base::FilePath where;
+
+    if (data.get() && package()->scoped_temp_dir().IsValid() &&
+      base::CreateTemporaryDirInDir(package()->scoped_temp_dir().path(), FILE_PATH_LITERAL("bitmapfont"), &where)) {
+      std::string stringData(reinterpret_cast<const char*>(data->front()), data->size());
+      if (zip::Unzip(stringData, where)) {
+        command_line.AppendSwitchPath(switches::kBitmapFontDir, where);
+      }
+    }
+  }
+  
+  if (command_line.HasSwitch(switches::kBitmapFontDir)) {
+    const base::FilePath& bitmapFontPath = command_line.GetSwitchValuePath(switches::kBitmapFontDir);
+    base::FilePath absolutePath;
+
+    if (!bitmapFontPath.IsAbsolute()) {
+    
+      FilePath dir_exe;
+      PathService::Get(base::DIR_EXE, &dir_exe);
+
+#if defined(OS_MACOSX)
+      // search inside resources
+      dir_exe = dir_exe.DirName().Append("Resources");
+      absolutePath = base::MakeAbsoluteFilePath(dir_exe.Append(bitmapFontPath));
+    
+      // if absolute path is empty. it means the path is not valid, try to search in the bundle folder
+      if(absolutePath.empty()) {
+        dir_exe = dir_exe.DirName().DirName().DirName();
+        absolutePath = base::MakeAbsoluteFilePath(dir_exe.Append(bitmapFontPath));
+      }
+#else
+      absolutePath = base::MakeAbsoluteFilePath(dir_exe.Append(bitmapFontPath));
+#endif
+    }
+    else {
+      absolutePath = bitmapFontPath;
+    }
+    
+    if (!base::DirectoryExists(absolutePath)) {
+      base::FilePath where;
+      
+      // not a directory, hopefully it is a zip file
+      if (absolutePath.Extension().compare(FILE_PATH_LITERAL(".zip")) == 0 && package()->scoped_temp_dir().IsValid() &&
+        base::CreateTemporaryDirInDir(package()->scoped_temp_dir().path(), FILE_PATH_LITERAL("bitmapfont"), &where)) {
+
+        if(zip::Unzip(absolutePath, where)) {
+          absolutePath = where;
+        }
+      }
+    }
+    
+    if (base::DirectoryExists(absolutePath))
+      command_line.AppendSwitchPath(switches::kBitmapFontDir, absolutePath);
+  }
 
   Shell::Create(browser_context_.get(),
                 package()->GetStartupURL(),
