@@ -80,6 +80,8 @@ class Package {
 
   // Manifest string.
   std::string package_string() { return package_string_; }
+  
+  const base::ScopedTempDir& scoped_temp_dir() { return scoped_temp_dir_; }
 
  private:
   bool InitFromPath();

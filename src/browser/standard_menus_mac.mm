@@ -111,6 +111,12 @@ void StandardMenusMac::BuildEditMenu() {
                       action:@selector(selectAll:)
                keyEquivalent:@"a"];
     
+  [editMenu addItem:[NSMenuItem separatorItem]];
+  
+  [[editMenu addItemWithTitle:l10n_util::GetNSStringWithFixup(IDS_EDIT_SPECIAL_CHARACTERS_MAC)//@"Special Characters..."
+                      action:@selector(orderFrontCharacterPalette:)
+               keyEquivalent:@" "] setKeyEquivalentModifierMask:NSCommandKeyMask|NSControlKeyMask];
+  
   menuItem = [[NSMenuItem alloc] initWithTitle:l10n_util::GetNSStringWithFixup(IDS_EDIT_MENU_MAC)
                                         action:nil
                                  keyEquivalent:@""];
