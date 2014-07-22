@@ -10,9 +10,14 @@
 #define CONTENT_NW_NOTIFICATION_MANAGER_LINUX_H_
 
 #include "content/nw/src/nw_notification_manager.h"
+#include <libnotify/notify.h>
 
 namespace nw {
 class NotificationManagerLinux : public NotificationManager {
+
+  std::map<int, NotifyNotification*>  mNotificationIDmap;
+  static void onClose(NotifyNotification *notif);
+
 
   // internal function for AddDesktopNotification
   virtual bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,

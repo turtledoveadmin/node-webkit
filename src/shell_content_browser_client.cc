@@ -453,7 +453,7 @@ void ShellContentBrowserClient::ShowDesktopNotification(
   bool worker) {
 #if defined(ENABLE_NOTIFICATIONS)
   nw::NotificationManager *notificationManager = nw::NotificationManager::getSingleton();
-  if (notificationManager == nullptr) {
+  if (notificationManager == NULL) {
     NOTIMPLEMENTED();
     return;
   }
@@ -470,7 +470,7 @@ void ShellContentBrowserClient::CancelDesktopNotification(
   int notification_id) {
 #if defined(ENABLE_NOTIFICATIONS)
   nw::NotificationManager *notificationManager = nw::NotificationManager::getSingleton();
-  if (notificationManager == nullptr) {
+  if (notificationManager == NULL) {
     NOTIMPLEMENTED();
     return;
   }

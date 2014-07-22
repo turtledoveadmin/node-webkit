@@ -20,17 +20,17 @@
 
 namespace nw
 {
-NotificationManager* NotificationManager::singleton_ = nullptr;
+NotificationManager* NotificationManager::singleton_ = NULL;
 
 NotificationManager::NotificationManager() {
 }
 
 NotificationManager::~NotificationManager() {
-  singleton_ = nullptr;
+  singleton_ = NULL;
 }
 
 NotificationManager* NotificationManager::getSingleton() {
-  if (singleton_ == nullptr) {
+  if (singleton_ == NULL) {
 #if defined(OS_MACOSX)
     singleton_ = new NotificationManagerMac();
 #elif defined(OS_WIN)
@@ -58,7 +58,7 @@ bool NotificationManager::AddDesktopNotification(const content::ShowDesktopNotif
 
 bool NotificationManager::DesktopNotificationPostClick(int render_process_id, int render_view_id, int notification_id) {
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
-  if (host == nullptr)
+  if (host == NULL)
     return false;
 
   host->DesktopNotificationPostClick(notification_id);
@@ -67,7 +67,7 @@ bool NotificationManager::DesktopNotificationPostClick(int render_process_id, in
 
 bool NotificationManager::DesktopNotificationPostClose(int render_process_id, int render_view_id, int notification_id, bool by_user) {
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
-  if (host == nullptr)
+  if (host == NULL)
     return false;
 
   host->DesktopNotificationPostClose(notification_id, by_user);
@@ -76,7 +76,7 @@ bool NotificationManager::DesktopNotificationPostClose(int render_process_id, in
 
 bool NotificationManager::DesktopNotificationPostDisplay(int render_process_id, int render_view_id, int notification_id) {
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
-  if (host == nullptr)
+  if (host == NULL)
     return false;
 
   host->DesktopNotificationPostDisplay(notification_id);
@@ -85,7 +85,7 @@ bool NotificationManager::DesktopNotificationPostDisplay(int render_process_id, 
 
 bool NotificationManager::DesktopNotificationPostError(int render_process_id, int render_view_id, int notification_id, const string16& message) {
   content::RenderViewHost* host = content::RenderViewHost::FromID(render_process_id, render_view_id);
-  if (host == nullptr)
+  if (host == NULL)
     return false;
 
   host->DesktopNotificationPostError(notification_id, message);

@@ -739,6 +739,11 @@
             '<(DEPTH)/build/linux/system.gyp:gtk',
           ],
         }],  # toolkit_uses_gtk
+        ['OS=="linux"', {
+          'dependencies': [
+            '<(DEPTH)/build/linux/system.gyp:notify',
+          ],
+        }],  # OS=="linux"
         ['OS=="mac"', {
           'product_name': '<(nw_product_name)',
           'dependencies!': [
