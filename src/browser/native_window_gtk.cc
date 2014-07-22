@@ -302,6 +302,10 @@ void NativeWindowGtk::SetBadgeLabel(const std::string& badge) {
   // TODO
 }
 
+void NativeWindowGtk::SetProgressBar(double progress) {
+  // TODO
+}
+
 void NativeWindowGtk::SetKiosk(bool kiosk) {
   SetFullscreen(kiosk);
 }
