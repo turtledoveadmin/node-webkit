@@ -85,7 +85,7 @@ if (require('os').platform() === 'darwin'){
         key: "h"
     }));
     appleMenu.append(new exports.MenuItem({
-        label: nw.getNSStringFWithFixup("IDS_HIDE_OTHERS_MAC", app_name),
+        label: nw.getNSStringWithFixup("IDS_HIDE_OTHERS_MAC"),
         selector: "hideOtherApplications:",
         key: "h",
         modifiers: "cmd-alt"
