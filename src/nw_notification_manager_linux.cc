@@ -32,18 +32,26 @@
 
 #include "ui/gfx/gtk_util.h"
 
-//#define GET_NOTIFICATION(id) mNotificationIDmap.find(id)
-//Ubuntu notify-osd can only show 1 notification, this is the "hack" to do that
-#define GET_NOTIFICATION(id) mNotificationIDmap.begin()
-
 namespace nw {
 
 NotificationManagerLinux::NotificationManagerLinux() {
   notify_init (content::Shell::GetPackage()->GetName().c_str());
+  char* info[4];
+  notify_get_server_info(&info[0], &info[1], &info[2], &info[3]);
+
+  //Ubuntu notify-osd can only show 1 notification, this is the "hack" to do that
+  mForceOneNotification = strcmp(info[0], "notify-osd") == 0;
 }
 
 NotificationManagerLinux::~NotificationManagerLinux() {
   notify_uninit();
+}
+
+std::map<int, NotifyNotification*>::iterator NotificationManagerLinux::getNotification(int id) {
+  if (mForceOneNotification) {
+    return mNotificationIDmap.begin();
+  }
+  return mNotificationIDmap.find(id);
 }
 
 void NotificationManagerLinux::onClose(NotifyNotification *notif)
@@ -95,7 +103,7 @@ bool NotificationManagerLinux::AddDesktopNotification(const content::ShowDesktop
   }
 
   NotifyNotification * notif;
-  std::map<int, NotifyNotification*>::iterator i = GET_NOTIFICATION(params.notification_id);
+  std::map<int, NotifyNotification*>::iterator i = getNotification(params.notification_id);
   if (i==mNotificationIDmap.end()) {
     notif = notify_notification_new (
       base::UTF16ToUTF8(params.title).c_str(), base::UTF16ToUTF8(params.body).c_str(), NULL);
@@ -125,7 +133,7 @@ bool NotificationManagerLinux::AddDesktopNotification(const content::ShowDesktop
 }
 
 bool NotificationManagerLinux::CancelDesktopNotification(int render_process_id, int render_view_id, int notification_id) {
-  std::map<int, NotifyNotification*>::const_iterator i = GET_NOTIFICATION(notification_id);
+  std::map<int, NotifyNotification*>::const_iterator i = getNotification(notification_id);
   if (i!=mNotificationIDmap.end()) {
     return notify_notification_close(i->second, NULL);
   }

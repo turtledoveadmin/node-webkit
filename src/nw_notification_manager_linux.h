@@ -28,7 +28,9 @@ class NotificationManagerLinux : public NotificationManager {
 
   std::map<int, NotifyNotification*>  mNotificationIDmap;
   static void onClose(NotifyNotification *notif);
+  bool mForceOneNotification;
 
+  std::map<int, NotifyNotification*>::iterator getNotification(int id);
 
   // internal function for AddDesktopNotification
   virtual bool AddDesktopNotification(const content::ShowDesktopNotificationHostMsgParams& params,
