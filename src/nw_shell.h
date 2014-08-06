@@ -130,7 +130,7 @@ class Shell : public WebContentsDelegate,
   static int exit_code() { return exit_code_; }
 
   WebContents* web_contents() const { return web_contents_.get(); }
-  nw::NativeWindow* window() { return window_.get(); }
+  nw::NativeWindow* window() const { return window_.get(); }
 
   void set_force_close(bool force) { force_close_ = force; }
   bool is_devtools() const { return is_devtools_; }
@@ -165,6 +165,10 @@ class Shell : public WebContentsDelegate,
                                   const base::string16& frame_name,
                                   const GURL& target_url,
                                   WebContents* new_contents) OVERRIDE;
+  virtual void ToggleFullscreenModeForTab(WebContents* web_contents,
+                                          bool enter_fullscreen) OVERRIDE;
+  virtual bool IsFullscreenForTabOrPending(
+      const WebContents* web_contents) const OVERRIDE;
 #if defined(OS_WIN)
   virtual void WebContentsFocused(WebContents* contents) OVERRIDE;
 #endif

@@ -63,6 +63,7 @@
       ],
       'include_dirs': [
         '<(DEPTH)',
+        '<(DEPTH)/third_party',
         '<(DEPTH)/third_party/WebKit/Source',
         '<(DEPTH)/third_party/WebKit/public/web',
         '<(DEPTH)/breakpad/src',
@@ -370,7 +371,7 @@
             '<(DEPTH)/ui/views/controls/webview/webview.gyp:webview',
           ],
         }],
-        ['(os_posix==1 and OS != "mac" and linux_use_tcmalloc==1)', {
+        ['(os_posix==1 and OS != "mac" and linux_use_tcmalloc==1 and asan==0)', {
           'dependencies': [
             # This is needed by content/app/content_main_runner.cc
             '<(DEPTH)/base/allocator/allocator.gyp:allocator',
