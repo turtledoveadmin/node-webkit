@@ -46,7 +46,6 @@
 #include "net/proxy/proxy_resolver_v8.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "third_party/zlib/google/zip.h"
-#include "grit/nw_resources.h"
 
 #if !defined(OS_WIN)
 #include <sys/resource.h>
@@ -224,16 +223,7 @@ void ShellBrowserMainParts::Init() {
   devtools_delegate_ = new ShellDevToolsDelegate(browser_context_.get(), port);
     
   if (!command_line.HasSwitch(switches::kBitmapFontDir)) {
-    scoped_refptr<base::RefCountedStaticMemory> data(ResourceBundle::GetSharedInstance().LoadDataResourceBytes(IDR_NW_BITMAPFONT));
-    base::FilePath where;
-
-    if (data.get() && package()->scoped_temp_dir().IsValid() &&
-      base::CreateTemporaryDirInDir(package()->scoped_temp_dir().path(), FILE_PATH_LITERAL("bitmapfont"), &where)) {
-      std::string stringData(reinterpret_cast<const char*>(data->front()), data->size());
-      if (zip::Unzip(stringData, where)) {
-        command_line.AppendSwitchPath(switches::kBitmapFontDir, where);
-      }
-    }
+    command_line.AppendSwitchASCII(switches::kBitmapFontDir, "bitmapfont.zip");
   }
   
   if (command_line.HasSwitch(switches::kBitmapFontDir)) {
