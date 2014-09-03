@@ -174,8 +174,8 @@ def generate_target_symbols(platform_name, arch, version):
         target['input'] = ['nw.breakpad.' + arch]
     elif platform_name == 'win':
         target['compress'] = 'zip'
-#        target['input'] = ['nw.exe.pdb']
-        target['input'] = []
+        target['input'] = ['nw.exe.pdb']
+#        target['input'] = []
     elif platform_name == 'osx':
         target['compress'] = 'tar.gz'
         target['input'] = [
@@ -195,8 +195,19 @@ def generate_target_others(platform_name, arch, version):
     target['output'] = ''
     target['compress'] = None
     if platform_name == 'win':
+        target['output'] = ''.join(['node-webkit-breakpad-',
+                                'v', version,
+                                '-', platform_name,
+                                '-', arch])
+        target['compress'] = 'zip'
         target['input'] = ['nw.exp', 'nw.lib', 'nw.sym.7z']
+#        target['input'] = []
     elif platform_name == 'osx' :
+        target['output'] = ''.join(['node-webkit-breakpad-',
+                                'v', version,
+                                '-', platform_name,
+                                '-', arch,
+                                '.tar.bz2'])
         target['input'] = ['node-webkit.breakpad.tar.bz2']
     else:
         target['input'] = []
@@ -264,10 +275,14 @@ def make_packages(targets):
             continue
         if t['compress'] == None:
             if t['output'] != '':
-                os.mkdir(dist_dir + t['output'])
+                if len(t['input']) > 1:
+                    os.mkdir(dist_dir + t['output'])
             for f in t['input']:
                 src = os.path.join(binaries_location, f)
-                dest = os.path.join(dist_dir + t['output'], f)
+                if len(t['input']) == 1:
+                    dest = os.path.join(dist_dir + '/', t['output'])
+                else:
+                    dest = os.path.join(dist_dir + t['output'], f)
                 print "Copying " + f
                 shutil.copy(src, dest)
         elif (t.has_key('folder') and t['folder'] == True) or len(t['input']) > 1:
