@@ -73,6 +73,7 @@ class NativeWindowWin : public NativeWindow,
   virtual void Restore() OVERRIDE;
   virtual void SetFullscreen(bool fullscreen) OVERRIDE;
   virtual bool IsFullscreen() OVERRIDE;
+  virtual void SetTransparent(bool transparent) OVERRIDE;
   virtual void SetSize(const gfx::Size& size) OVERRIDE;
   virtual gfx::Size GetSize() OVERRIDE;
   virtual void SetMinimumSize(int width, int height) OVERRIDE;

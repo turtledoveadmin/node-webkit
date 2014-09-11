@@ -263,6 +263,10 @@ void Window::Call(const std::string& method,
     std::string label;
     if (arguments.GetString(0, &label))
       shell_->window()->SetBadgeLabel(label);
+  } else if (method == "SetTransparent") {
+    bool transparent;
+    if (arguments.GetBoolean(0, &transparent))
+      shell_->window()->SetTransparent(transparent);
   } else if (method == "SetProgressBar") {
     double progress;
     if (arguments.GetDouble(0, &progress))
@@ -310,6 +314,9 @@ void Window::CallSync(const std::string& method,
     gfx::Point position = shell_->window()->GetPosition();
     result->AppendInteger(position.x());
     result->AppendInteger(position.y());
+  } else if (method == "IsTransparent") {
+    bool transparent = shell_->window()->IsTransparent();
+    result->AppendBoolean(transparent);
   } else if (method == "IsDevToolsOpen") {
     result->AppendBoolean(shell_->devToolsOpen());
   } else if (method == "ShowDevTools") {
