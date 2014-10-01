@@ -48,6 +48,7 @@
 #include "ui/gfx/font_list.h"
 #include "ui/gfx/platform_font.h"
 #include "ui/gfx/image/image_skia_operations.h"
+#include "ui/views/background.h"
 #include "ui/views/controls/webview/webview.h"
 #include "ui/views/layout/box_layout.h"
 #include "ui/views/views_delegate.h"
@@ -69,6 +70,7 @@
 #endif
 
 
+#include <dwmapi.h>
 
 namespace nw {
 
@@ -281,6 +283,7 @@ NativeWindowWin::NativeWindowWin(const base::WeakPtr<content::Shell>& shell,
   params.top_level = true;
   params.remove_standard_frame = !has_frame();
   params.use_system_default_icon = true;
+  if (transparent_) params.opacity = views::Widget::InitParams::TRANSLUCENT_WINDOW;
   window_->Init(params);
   if (!has_frame())
     InstallEasyResizeTargeterOnContainer();
@@ -368,6 +371,77 @@ void NativeWindowWin::SetFullscreen(bool fullscreen) {
 
 bool NativeWindowWin::IsFullscreen() {
   return is_fullscreen_;
+}
+
+void NativeWindowWin::SetTransparent(bool transparent) {
+  // Check for Windows Vista or higher, transparency isn't supported in 
+  // anything lower. 
+  if (base::win::GetVersion() < base::win::VERSION_VISTA) {
+    NOTREACHED() << "The operating system does not support transparency.";
+    transparent_ = false;
+    return;
+  }
+
+  // Check to see if composition is disabled, if so we have to throw an 
+  // error, there's no graceful recovery, yet. TODO: Graceful recovery.
+  BOOL enabled = FALSE;
+  HRESULT result = ::DwmIsCompositionEnabled(&enabled);
+  if (!enabled || !SUCCEEDED(result)) {
+    NOTREACHED() << "Windows DWM composition is not enabled, transparency is not supported.";
+    transparent_ = false;
+    return;
+  }
+
+  HWND hWnd = views::HWNDForWidget(window_);
+
+  const int marginVal = transparent ? -1 : 0;
+  MARGINS mgMarInset = { marginVal, marginVal, marginVal, marginVal };
+  if (DwmExtendFrameIntoClientArea(hWnd, &mgMarInset) != S_OK) {
+    NOTREACHED() << "Windows DWM extending to client area failed, transparency is not supported.";
+    transparent_ = false;
+    return;
+  }
+
+  // this is needed, or transparency will fail if it defined on startup
+  bool change_window_style = false;
+
+  if (!has_frame_) {
+    const LONG lastStyle = GetWindowLong(hWnd, GWL_STYLE);
+    const LONG style = WS_CAPTION;
+    const LONG newStyle = transparent ? lastStyle | style : lastStyle & ~style;
+    SetWindowLong(hWnd, GWL_STYLE, newStyle);
+    change_window_style |= lastStyle != newStyle;
+  }
+
+  const LONG lastExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+  const LONG exStyle = WS_EX_COMPOSITED;
+  const LONG newExStyle = transparent ? lastExStyle | exStyle : lastExStyle & ~exStyle;
+  SetWindowLong(hWnd, GWL_EXSTYLE, newExStyle);
+  change_window_style |= lastExStyle != newExStyle;
+
+  if (change_window_style) {
+    window_->FrameTypeChanged();
+  }
+
+  if (toolbar_)
+    toolbar_->set_background(transparent ? views::Background::CreateSolidBackground(SK_ColorTRANSPARENT) : 
+      views::Background::CreateStandardPanelBackground());
+
+  content::RenderWidgetHostView* rwhv = shell_->web_contents()->GetRenderWidgetHostView();
+  if (rwhv) {
+    SkBitmap background;
+    if (transparent) {
+      int width = 1;
+      int height = 1;
+      background.setConfig(SkBitmap::kARGB_8888_Config, width, height);
+      background.allocPixels();
+      const U8CPU col = transparent ? 0x00 : 0xFF;
+      background.eraseARGB(col, col, col, col);
+    }
+    rwhv->SetBackground(background);
+  }
+
+  transparent_ = transparent;
 }
 
 void NativeWindowWin::SetSize(const gfx::Size& size) {
