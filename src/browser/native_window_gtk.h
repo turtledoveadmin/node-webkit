@@ -125,6 +125,8 @@ class NativeWindowGtk : public NativeWindow {
                        GdkEventMotion*);
   CHROMEGTK_CALLBACK_1(NativeWindowGtk, gboolean, OnWindowConfigureEvent,
                        GdkEvent*);
+  CHROMEGTK_CALLBACK_1(NativeWindowGtk, gboolean, OnExposeEvent,
+                       GdkEventExpose*);
 
   GtkWindow* window_;
   GtkWidget* toolbar_;

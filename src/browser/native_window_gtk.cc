@@ -31,6 +31,7 @@
 #include "content/nw/src/common/shell_switches.h"
 #include "content/nw/src/nw_shell.h"
 #include "content/public/browser/render_view_host.h"
+#include "content/public/browser/render_widget_host_view.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/common/renderer_preferences.h"
 #include "ui/base/x/x11_util.h"
@@ -134,6 +135,8 @@ NativeWindowGtk::NativeWindowGtk(const base::WeakPtr<content::Shell>& shell,
   if (ui::GuessWindowManager() == ui::WM_COMPIZ)
     suppress_window_raise_ = true;
 
+  gtk_widget_set_app_paintable(GTK_WIDGET(window_), TRUE);
+
   g_signal_connect(window_, "destroy",
                    G_CALLBACK(OnWindowDestroyedThunk), this);
   g_signal_connect(window_, "focus-in-event",
@@ -146,6 +149,14 @@ NativeWindowGtk::NativeWindowGtk(const base::WeakPtr<content::Shell>& shell,
                    G_CALLBACK(OnWindowDeleteEventThunk), this);
   g_signal_connect(window_, "configure-event",
                    G_CALLBACK(OnWindowConfigureEventThunk), this);
+  g_signal_connect(window_, "expose-event",
+                   G_CALLBACK(OnExposeEventThunk), this);
+
+
+  GdkScreen *screen = gtk_widget_get_screen(GTK_WIDGET(window_));
+  GdkColormap *colormap = gdk_screen_get_rgba_colormap(screen);
+  gtk_widget_set_colormap(GTK_WIDGET(window_), colormap);
+
   if (!has_frame_) {
     g_signal_connect(window_, "button-press-event",
                      G_CALLBACK(OnButtonPressThunk), this);
@@ -231,6 +242,30 @@ bool NativeWindowGtk::IsMinimized() const {
 
 void NativeWindowGtk::SetSize(const gfx::Size& size) {
   gtk_window_util::SetWindowSize(window_, size);
+}
+
+void NativeWindowGtk::SetTransparent(bool transparent) {
+  content::RenderWidgetHostView* rwhv = shell_->web_contents()->GetRenderWidgetHostView();
+  if (rwhv) {
+    SkBitmap background;
+    if (transparent) {
+      int width = 1;
+      int height = 1;
+      background.setConfig(SkBitmap::kARGB_8888_Config, width, height);
+      background.allocPixels();
+      const U8CPU col = transparent ? 0x00 : 0xFF;
+      background.eraseARGB(col, col, col, col);
+    }
+    rwhv->SetBackground(background);
+  }
+
+  if (toolbar_) {
+    const guint16 col = transparent ? 0 : 0xFfFf;
+    GdkColor color = {0, col, col, col};
+    gtk_widget_modify_bg (toolbar_, GTK_STATE_NORMAL, &color);
+  }
+
+  transparent_ = transparent;
 }
 
 gfx::Size NativeWindowGtk::GetSize() {
@@ -649,6 +684,22 @@ gboolean NativeWindowGtk::OnWindowConfigureEvent(GtkWidget* window,
   }
   return FALSE;
 }
+
+gboolean NativeWindowGtk::OnExposeEvent(GtkWidget* widget,
+                                            GdkEventExpose* event) {
+  cairo_t *cr = gdk_cairo_create(widget->window);
+
+  const double col = transparent_ ? 0.0 : 1.0;
+  cairo_set_source_rgba (cr, col, col, col, col);
+
+  /* draw the background */
+  cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+  cairo_paint (cr);
+  cairo_destroy(cr);
+
+  return FALSE;
+}
+
 
 bool NativeWindowGtk::GetWindowEdge(int x, int y, GdkWindowEdge* edge) {
   if (has_frame_)
