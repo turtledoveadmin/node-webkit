@@ -1,3 +1,43 @@
+0.10.5 / 09-16-2014
+===================
+- Fix: support more Chromium command line args (#1743, Thanks to Joachim Bauch)
+- Fix #2171: crash when opening window 
+- Fix #2326: some websites crashes NW in Windows (fixed with the same file as updating to VS2013 Update 2)
+- Fix: win: crash on invalid parameter error (thanks to Mikael Roos)
+- Fix #1991 in a better way: [WIN] stalling for seconds under threaded composition on some hardware (#1991)
+- Fix: [WIN] single-instance crash
+- Fix: autofill crash when filling number in input box (#2310)
+- Fix: CSP is not effective (#1672)
+- Fix: crash when calling console.log() with a cross-domain window object in some cases (#1573)
+- Fix: crash when stepping into a breakpoint set in scripts loaded by require() (#2214)
+
+0.10.4 / 09-05-2014
+===================
+- Fix: [WIN] child_process.fork() by making nw executable run as node
+- Fix: [WIN] stalling for seconds under threaded composition on some hardware (#1991)
+- Fix: [OSX] disable File Quarantine (#2294)
+- Fix: [OSX] disable sound for notification
+- support 'chrome://gpu' diagnosic page
+
+0.10.3 / 09-01-2014
+===================
+- Fix: child_process.fork() (#213) by making nw executable run as node
+- Fix: [OSX] process.nextTick() blocked in some cases (#2170)
+
+0.10.2 / 08-12-2014
+===================
+- Support screen geometry API (#2178 Thanks to Jefry Tedjokusumo
+- Support progress bar (#2175 Thanks to Jefry Tedjokusumo)
+- Window.requestAttention() now accepts an integer parameter [4]
+- Fix: JS source code snapshot is now working
+- Fix: Linux: shift modifier not working for window menu
+- Fix: Win: window.navigator.language is empty
+- Fix: require works in wrong path in new-instance window (#2167)
+- Fix: support for screencapture media requests (Thanks to Joachim Bauch)
+- Fix: Win: cursor not loaded in some cases (#2150, #2152)
+- Fix: crash on some cases (#2155, #2148)
+- Fix: Large combo-box does not scroll properly and values overlaps on each other (#2161; upstream #357480)
+
 0.10.1 / 07-30-2014
 ===================
 - Support Desktop notification (#27 Thanks to Jefry Tedjokusumo)

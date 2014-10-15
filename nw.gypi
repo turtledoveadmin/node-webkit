@@ -377,6 +377,14 @@
             '<(DEPTH)/base/allocator/allocator.gyp:allocator',
           ],
         }],
+        ['OS=="win" and target_arch=="ia32"', {
+          'sources': [
+            # TODO(scottmg): This is a workaround for
+            # http://crbug.com/348525 that affects VS2013 before Update 2.
+            # This should be removed once Update 2 is released.
+            '<(DEPTH)/build/win/ftol3.obj',
+          ],
+        }],
         ['OS=="win"', {
           'sources': [
             '<(DEPTH)/chrome/browser/ui/views/constrained_window_views.cc',
@@ -612,6 +620,7 @@
               '<(SHARED_INTERMEDIATE_DIR)/net/net_resources.pak',
               '<(SHARED_INTERMEDIATE_DIR)/ui/app_locale_settings/app_locale_settings_en-US.pak',
               '<(SHARED_INTERMEDIATE_DIR)/ui/ui_resources/ui_resources_100_percent.pak',
+              '<(SHARED_INTERMEDIATE_DIR)/ui/ui_resources/webui_resources.pak',
               '<(SHARED_INTERMEDIATE_DIR)/ui/ui_strings/ui_strings_en-US.pak',
               '<(SHARED_INTERMEDIATE_DIR)/webkit/devtools_resources.pak',
               '<(SHARED_INTERMEDIATE_DIR)/webkit/blink_resources.pak',
