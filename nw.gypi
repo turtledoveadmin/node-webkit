@@ -463,6 +463,7 @@
           'link_settings': {
             'libraries': [
               '$(SDKROOT)/System/Library/Frameworks/AddressBook.framework',
+              '$(SDKROOT)/System/Library/Frameworks/CoreLocation.framework',
             ],
           },
         }],
