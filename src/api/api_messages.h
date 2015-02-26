@@ -23,16 +23,12 @@
 
 #include "base/values.h"
 #include "extensions/common/draggable_region.h"
+#include "extensions/common/extension_messages.h"
 #include "content/public/common/common_param_traits.h"
 #include "ipc/ipc_message_macros.h"
 #include "ui/gfx/ipc/gfx_param_traits.h"
 
 #define IPC_MESSAGE_START ShellMsgStart
-
-IPC_STRUCT_TRAITS_BEGIN(extensions::DraggableRegion)
-  IPC_STRUCT_TRAITS_MEMBER(draggable)
-  IPC_STRUCT_TRAITS_MEMBER(bounds)
-IPC_STRUCT_TRAITS_END()
 
 IPC_MESSAGE_ROUTED3(ShellViewHostMsg_Allocate_Object,
                     int /* object id */,

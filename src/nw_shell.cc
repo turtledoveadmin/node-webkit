@@ -77,11 +77,41 @@
 using nw::NativeWindowAura;
 #endif
 
+#include "content/public/browser/desktop_media_id.h"
+#include "content/public/browser/media_capture_devices.h"
+
 #include "content/nw/src/browser/printing/print_view_manager.h"
 
 using base::MessageLoop;
 
 using content::DevToolsHttpHandlerImpl;
+using content::MediaCaptureDevices;
+using content::MediaStreamDevice;
+using content::MediaStreamDevices;
+using content::MediaStreamUI;
+
+namespace chrome {
+  bool IsNativeWindowInAsh(gfx::NativeWindow native_window) {
+    return false;
+  }
+}
+
+namespace {
+
+const MediaStreamDevice* GetRequestedDeviceOrDefault(
+    const MediaStreamDevices& devices,
+    const std::string& requested_device_id) {
+  if (!requested_device_id.empty())
+    return devices.FindById(requested_device_id);
+
+  if (!devices.empty())
+    return &devices[0];
+
+  return NULL;
+}
+
+}
+
 namespace content {
 
 std::vector<Shell*> Shell::windows_;
@@ -678,10 +708,38 @@ void Shell::RequestMediaAccessPermission(
       WebContents* web_contents,
       const MediaStreamRequest& request,
       const MediaResponseCallback& callback) {
-  scoped_ptr<MediaStreamDevicesController>
-      controller(new MediaStreamDevicesController(request,
-                                                  callback));
-  controller->DismissInfoBarAndTakeActionOnSettings();
+  MediaStreamDevices devices;
+
+  if (request.audio_type == content::MEDIA_DEVICE_AUDIO_CAPTURE) {
+    const MediaStreamDevice* device = GetRequestedDeviceOrDefault(
+        MediaCaptureDevices::GetInstance()->GetAudioCaptureDevices(),
+        request.requested_audio_device_id);
+    if (device)
+      devices.push_back(*device);
+  }
+
+  if (request.video_type == content::MEDIA_DEVICE_VIDEO_CAPTURE) {
+    const MediaStreamDevice* device = GetRequestedDeviceOrDefault(
+        MediaCaptureDevices::GetInstance()->GetVideoCaptureDevices(),
+        request.requested_video_device_id);
+    if (device)
+      devices.push_back(*device);
+  }
+
+  if (request.video_type == content::MEDIA_DESKTOP_VIDEO_CAPTURE &&
+      !request.requested_video_device_id.empty()) {
+    content::DesktopMediaID media_id =
+        content::DesktopMediaID::Parse(request.requested_video_device_id);
+
+    devices.push_back(content::MediaStreamDevice(
+                      content::MEDIA_DESKTOP_VIDEO_CAPTURE, media_id.ToString(), "Screen"));
+  }
+  // TODO(jamescook): Should we show a recording icon somewhere? If so, where?
+  scoped_ptr<MediaStreamUI> ui;
+  callback.Run(devices,
+               devices.empty() ? content::MEDIA_DEVICE_INVALID_STATE
+                               : content::MEDIA_DEVICE_OK,
+               ui.Pass());
 }
 
 void Shell::Observe(int type,
